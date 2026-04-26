@@ -1,6 +1,5 @@
 from datetime import timedelta
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.utils import timezone
 from .models import User, Session
 from uuid import uuid4
@@ -50,3 +49,16 @@ def login(request):
             return HttpResponse('Пароль неверный')
 
         return HttpResponse('Такого пользователя нет')
+
+
+def logout(request):
+    user = request.user
+    if user:
+        Session.objects.filter(user=user).delete()
+        response = HttpResponse('Вы вышли из аккаунта')
+        response.delete_cookie('sessionid')
+
+    else:
+        response = HttpResponse('Вы не вышли из аккаунта')
+
+    return response
