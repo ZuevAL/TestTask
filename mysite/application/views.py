@@ -15,6 +15,7 @@ def register(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         repeat_password = request.POST.get('repeat_password')
+
         if User.objects.filter(email=email).exists():
             return HttpResponse('Пользователь с таким email уже существует')
 
