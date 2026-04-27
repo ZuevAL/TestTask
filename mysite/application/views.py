@@ -77,3 +77,19 @@ def delete_account(request):
         response = HttpResponse('Аккаунт не был удален')
 
     return response
+
+
+def update_profile(request):
+    user = request.user
+    if user and request.method == 'POST':
+        name = request.POST.get('name')
+        surname = request.POST.get('surname')
+        if name:
+            user.name = name
+        if surname:
+            user.surname = surname
+
+        user.save()
+        return HttpResponse('Данные аккаунта успешно обновлены')
+
+    return HttpResponse('Данные аккаунта не обновлены')
