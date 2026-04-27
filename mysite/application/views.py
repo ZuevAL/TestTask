@@ -62,3 +62,18 @@ def logout(request):
         response = HttpResponse('Вы не вышли из аккаунта')
 
     return response
+
+
+def delete_account(request):
+    user = request.user
+    if user:
+        Session.objects.filter(user=user).delete()
+        user.is_active = False
+        user.save()
+        response = HttpResponse('Вы удалили аккаунт')
+        response.delete_cookie('sessionid')
+
+    else:
+        response = HttpResponse('Аккаунт не был удален')
+
+    return response
