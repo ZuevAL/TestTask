@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
 from .models import User, Session
 from uuid import uuid4
@@ -93,3 +93,14 @@ def update_profile(request):
         return HttpResponse('Данные аккаунта успешно обновлены')
 
     return HttpResponse('Данные аккаунта не обновлены')
+
+
+def delete_article(request):
+    user = request.user
+    if user:
+        if user.role.permissions.filter(name='can_delete_article').exists():
+            return HttpResponse('Статья удалена')
+
+        return HttpResponseForbidden('Нет прав доступа для этого действия')
+
+    return HttpResponseForbidden('Пользователь не авторизирован')
