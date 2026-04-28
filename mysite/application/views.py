@@ -1,11 +1,13 @@
 from datetime import timedelta
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import User, Session, Article, AccessRule
 from uuid import uuid4
 import bcrypt
 
 
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -32,6 +34,7 @@ def register(request):
         return HttpResponse('Регистрация прошла успешно!')
 
 
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -79,6 +82,7 @@ def delete_account(request):
     return response
 
 
+@csrf_exempt
 def update_profile(request):
     user = request.user
     if user and request.method == 'POST':
