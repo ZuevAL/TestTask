@@ -1,7 +1,7 @@
 from datetime import timedelta
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils import timezone
-from .models import User, Session
+from .models import User, Session, Article, AccessRule
 from uuid import uuid4
 import bcrypt
 
@@ -95,12 +95,21 @@ def update_profile(request):
     return HttpResponse('Данные аккаунта не обновлены')
 
 
-def delete_article(request):
+def delete_article(request, article_id):
     user = request.user
-    if user:
-        if user.role.permissions.filter(name='can_delete_article').exists():
-            return HttpResponse('Статья удалена')
+    if not user:
+        return HttpResponseForbidden('Пользователь не авторизирован')
 
-        return HttpResponseForbidden('Нет прав доступа для этого действия')
+    try:
+        article = Article.objects.get(id=article_id)
+    except Article.DoesNotExist:
+        return HttpResponseNotFound('Статья не найдена')
 
-    return HttpResponseForbidden('Пользователь не авторизирован')
+    rule = AccessRule.objects.filter(role=user.role, element_name='Article').first()
+    if rule is None:
+        return HttpResponseForbidden('Нет прав доступа')
+
+    if rule.delete_all_permission or (rule.delete_own_permission and article.owner == user):
+        return HttpResponse('Статья удалена')
+
+    return HttpResponseForbidden('Нет прав доступа для этого действия')

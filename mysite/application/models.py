@@ -1,13 +1,8 @@
 from django.db import models
 
 
-class Permission(models.Model):
-    name = models.CharField(max_length=50)
-
-
 class Role(models.Model):
     name = models.CharField(max_length=50)
-    permissions = models.ManyToManyField(Permission)
 
 
 class User(models.Model):
@@ -24,3 +19,18 @@ class Session(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     session = models.CharField(max_length=255)
     expire_at = models.DateTimeField()
+
+
+class Article(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    is_hidden = models.BooleanField(default=True)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+
+class AccessRule(models.Model):
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+    element_name = models.CharField(max_length=255)
+    create_permission = models.BooleanField()
+    delete_own_permission = models.BooleanField()
+    delete_all_permission = models.BooleanField()
