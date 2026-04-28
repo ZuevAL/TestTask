@@ -4,6 +4,9 @@ from django.db import models
 class Role(models.Model):
     name = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f'{self.name}'
+
 
 class User(models.Model):
     name = models.CharField(max_length=255)
@@ -13,6 +16,9 @@ class User(models.Model):
     password = models.CharField(max_length=60)
     is_active = models.BooleanField(default=True)
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f'{self.email} | {self.name} {self.surname}'
 
 
 class Session(models.Model):
