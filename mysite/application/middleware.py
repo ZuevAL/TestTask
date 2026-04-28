@@ -7,7 +7,6 @@ class CustomAuthMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.user = None
         cookie = request.COOKIES.get('sessionid')
         session_obj = Session.objects.filter(session=cookie).first()
         if session_obj and timezone.now() < session_obj.expire_at:
