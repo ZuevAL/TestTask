@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import User, Session, Article, AccessRule
@@ -127,3 +127,45 @@ def delete_article(request, article_id):
         return HttpResponse('Статья удалена')
 
     return HttpResponseForbidden('Нет прав доступа для этого действия')
+
+
+@csrf_exempt
+def manage_rules(request):
+    user = request.user
+    if not isinstance(user, User):
+        return HttpResponse('Пользователь не авторизован', status=401)
+
+    if user.role.name != 'Admin':
+        return HttpResponseForbidden('Нет прав доступа')
+
+    if request.method == 'GET':
+        all_rules = AccessRule.objects.all()
+        rules_data = []
+        for rule in all_rules:
+            rules_data.append({
+                'id': rule.id,
+                'role': rule.role.name if rule.role else 'Без роли',
+                'element_name': rule.element_name,
+                'create_permission': rule.create_permission,
+                'delete_own_permission': rule.delete_own_permission,
+                'delete_all_permission': rule.delete_all_permission,
+            })
+
+        return JsonResponse({'rules': rules_data})
+
+    elif request.method == 'POST':
+        rule = request.POST.get('rule_id')
+        access_rule = AccessRule.objects.filter(id=rule).first()
+        if access_rule is None:
+            return HttpResponseNotFound('Нет информации об изменяемой роли')
+
+        create_per = request.POST.get('create_permission') == 'True'
+        delete_own_per = request.POST.get('delete_own_permission') == 'True'
+        delete_all_per = request.POST.get('delete_all_permission') == 'True'
+
+        access_rule.create_permission = create_per
+        access_rule.delete_own_permission = delete_own_per
+        access_rule.delete_all_permission = delete_all_per
+        access_rule.save()
+
+        return HttpResponse('Изменения успешно сохранены')
