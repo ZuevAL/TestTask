@@ -40,7 +40,7 @@ def login(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = User.objects.filter(email=email).first()
-        if user:
+        if user and user.is_active:
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
                 random_key = str(uuid4())
                 expire_time = timezone.now() + timedelta(days=7)
@@ -77,7 +77,7 @@ def delete_account(request):
         response.delete_cookie('sessionid')
 
     else:
-        response = HttpResponse('Аккаунт не был удален')
+        response = HttpResponse('Аккаунт не найден')
 
     return response
 
