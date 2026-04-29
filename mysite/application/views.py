@@ -57,6 +57,8 @@ def login(request):
 
         return HttpResponse('Такого пользователя нет')
 
+    return HttpResponse('Неверный метод запроса')
+
 
 def logout(request):
     user = request.user
@@ -66,7 +68,7 @@ def logout(request):
         response.delete_cookie('sessionid')
 
     else:
-        response = HttpResponse('Вы не вышли из аккаунта')
+        response = HttpResponse('Пользователь не авторизован', status=401)
 
     return response
 
@@ -81,7 +83,7 @@ def delete_account(request):
         response.delete_cookie('sessionid')
 
     else:
-        response = HttpResponse('Аккаунт не найден')
+        response = HttpResponse('Пользователь не авторизирован', status=401)
 
     return response
 
@@ -89,7 +91,10 @@ def delete_account(request):
 @csrf_exempt
 def update_profile(request):
     user = request.user
-    if isinstance(user, User) and request.method == 'POST':
+    if not isinstance(user, User):
+        return HttpResponse('Пользователь не авторизован', status=401)
+
+    if request.method == 'POST':
         name = request.POST.get('name')
         surname = request.POST.get('surname')
         if name:
@@ -100,13 +105,13 @@ def update_profile(request):
         user.save()
         return HttpResponse('Данные аккаунта успешно обновлены')
 
-    return HttpResponse('Данные аккаунта не обновлены')
+    return HttpResponse('Данные аккаунта не обновлены, неверный метод запроса')
 
 
 def delete_article(request, article_id):
     user = request.user
     if not isinstance(user, User):
-        return HttpResponseForbidden('Пользователь не авторизирован')
+        return HttpResponse('Пользователь не авторизирован', status=401)
 
     try:
         article = Article.objects.get(id=article_id)
