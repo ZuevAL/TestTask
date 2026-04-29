@@ -9,7 +9,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(models.User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['name', 'surname', 'email']
+    list_display = ['name', 'surname', 'email', 'is_active', 'role']
 
 
 @admin.register(models.Article)
