@@ -56,7 +56,7 @@ def login(request):
 
 def logout(request):
     user = request.user
-    if user:
+    if isinstance(user, User):
         Session.objects.filter(user=user).delete()
         response = HttpResponse('Вы вышли из аккаунта')
         response.delete_cookie('sessionid')
@@ -69,7 +69,7 @@ def logout(request):
 
 def delete_account(request):
     user = request.user
-    if user:
+    if isinstance(user, User):
         Session.objects.filter(user=user).delete()
         user.is_active = False
         user.save()
@@ -85,7 +85,7 @@ def delete_account(request):
 @csrf_exempt
 def update_profile(request):
     user = request.user
-    if user and request.method == 'POST':
+    if isinstance(user, User) and request.method == 'POST':
         name = request.POST.get('name')
         surname = request.POST.get('surname')
         if name:
@@ -101,7 +101,7 @@ def update_profile(request):
 
 def delete_article(request, article_id):
     user = request.user
-    if not user:
+    if not isinstance(user, User):
         return HttpResponseForbidden('Пользователь не авторизирован')
 
     try:
@@ -114,6 +114,7 @@ def delete_article(request, article_id):
         return HttpResponseForbidden('Нет прав доступа')
 
     if rule.delete_all_permission or (rule.delete_own_permission and article.owner == user):
+        article.delete()
         return HttpResponse('Статья удалена')
 
     return HttpResponseForbidden('Нет прав доступа для этого действия')
