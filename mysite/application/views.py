@@ -46,6 +46,10 @@ def login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+
+        if not email or not password:
+            return HttpResponse('Заполните email и пароль', status=400)
+
         user = User.objects.filter(email=email).first()
         if user and user.is_active:
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
