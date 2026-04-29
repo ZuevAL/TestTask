@@ -17,8 +17,12 @@ def register(request):
         password = request.POST.get('password')
         repeat_password = request.POST.get('repeat_password')
 
-        if User.objects.filter(email=email).exists():
-            return HttpResponse('Пользователь с таким email уже существует')
+        user_in_db = User.objects.filter(email=email).first()
+        if user_in_db:
+            if user_in_db.is_active:
+                return HttpResponse('Пользователь с таким email уже существует')
+
+            return HttpResponse('Пользователь с таким email был удален')
 
         if password != repeat_password:
             return HttpResponse('Пароли различаются')
