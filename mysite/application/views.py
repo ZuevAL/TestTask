@@ -17,6 +17,9 @@ def register(request):
         password = request.POST.get('password')
         repeat_password = request.POST.get('repeat_password')
 
+        if not email or not password or not name or not surname:
+            return HttpResponse('Пожалуйста, заполните все обязательные поля', status=400)
+
         user_in_db = User.objects.filter(email=email).first()
         if user_in_db:
             if user_in_db.is_active:
@@ -135,7 +138,7 @@ def manage_rules(request):
     if not isinstance(user, User):
         return HttpResponse('Пользователь не авторизован', status=401)
 
-    if user.role.name != 'Admin':
+    if not user.role or user.role.name != 'Admin':
         return HttpResponseForbidden('Нет прав доступа')
 
     if request.method == 'GET':
